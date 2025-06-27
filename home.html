@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery Manager</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .breadcrumb {
+            color: white;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        /* Main Content */
+        .main-content {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* Home Page Styles */
+        .home-page {
+            display: block;
+        }
+
+        .create-group-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .groups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .group-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+            cursor: pointer;
+        }
+
+        .group-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .group-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .group-stats {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .group-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Group Page Styles */
+        .group-page {
+            display: none;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
+        }
+
+        .filter-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .date-input {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-stats {
+            margin-left: auto;
+            color: #666;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-area {
+            border: 3px dashed #ccc;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .photo-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .photo-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .photo-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .photo-info {
+            padding: 15px;
+        }
+
+        .photo-description {
+            margin-bottom: 15px;
+        }
+
+        .photo-description textarea {
+            width: 100%;
+            min-height: 60px;
+            resize: vertical;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+
+        .photo-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .modal-download {
+            position: absolute;
+            top: -40px;
+            right: 50px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #ccc;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .nav {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-left {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .groups-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .photos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-stats {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .group-card, .photo-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-images"></i> Photo Gallery Manager</h1>
+            <p>Organize your photos into beautiful collections</p>
+        </div>
+
+        <div class="nav">
+            <div class="nav-left">
+                <div class="breadcrumb">
+                    <i class="fas fa-home"></i>
+                    <span id="breadcrumbText">Home</span>
+                </div>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-secondary" id="backBtn" style="display: none;">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Home Page -->
+            <div class="home-page" id="homePage">
+                <div class="create-group-form">
+                    <h2><i class="fas fa-plus-circle"></i> Create New Group</h2>
+                    <div class="form-group">
+                        <label for="groupName">Group Name</label>
+                        <input type="text" id="groupName" class="form-control" placeholder="Enter group name...">
+                    </div>
+                    <button class="btn btn-primary" id="createGroupBtn">
+                        <i class="fas fa-plus"></i> Create Group
+                    </button>
+                </div>
+
+                <div id="groupsList">
+                    <div class="empty-state" id="emptyState">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>No groups yet</h3>
+                        <p>Create your first group to start organizing photos</p>
+                    </div>
+                    <div class="groups-grid" id="groupsGrid" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Group Page -->
+            <div class="group-page" id="groupPage">
+                <div class="upload-section">
+                    <h2 id="groupTitle"><i class="fas fa-folder"></i> Group Name</h2>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">Drag & drop photos here or click to select</div>
+                        <div style="font-size: 0.9rem; color: #999;">Supports JPG, PNG, GIF files</div>
+                        <input type="file" id="fileInput" class="file-input" multiple accept="image/*">
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-controls">
+                        <div class="filter-group">
+                            <label for="dateFrom">From Date</label>
+                            <input type="date" id="dateFrom" class="date-input">
+                        </div>
+                        <div class="filter-group">
+                            <label for="dateTo">To Date</label>
+                            <input type="date" id="dateTo" class="date-input">
+                        </div>
+                        <div class="filter-group">
+                            <button class="btn btn-primary btn-sm" id="applyFilterBtn">
+                                <i class="fas fa-filter"></i> Apply Filter
+                            </button>
+                        </div>
+                        <div class="filter-group">
+                            <button class="btn btn-secondary btn-sm" id="clearFilterBtn">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                        <div class="filter-stats" id="filterStats">
+                            <i class="fas fa-images"></i>
+                            <span id="photoCount">0 photos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="photosList">
+                    <div class="empty-state" id="photosEmptyState">
+                        <i class="fas fa-images"></i>
+                        <h3>No photos yet</h3>
+                        <p>Upload your first photos to this group</p>
+                    </div>
+                    <div class="photos-grid" id="photosGrid" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <button class="modal-download" id="modalDownload">
+                <i class="fas fa-download"></i> Download
+            </button>
+            <img class="modal-image" id="modalImage" src="" alt="">
+        </div>
+    </div>
+
+    <script>
+        class PhotoGalleryApp {
+            constructor() {
+                this.groups = JSON.parse(localStorage.getItem('photoGroups') || '[]');
+                this.currentGroup = null;
+                this.currentImageUrl = null;
+                this.filteredPhotos = [];
+                this.dateFilter = { from: null, to: null };
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.renderGroups();
+            }
+
+            bindEvents() {
+                // Navigation
+                document.getElementById('backBtn').addEventListener('click', () => this.showHomePage());
+                
+                // Create group
+                document.getElementById('createGroupBtn').addEventListener('click', () => this.createGroup());
+                document.getElementById('groupName').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.createGroup();
+                });
+
+                // File upload
+                const uploadArea = document.getElementById('uploadArea');
+                const fileInput = document.getElementById('fileInput');
+
+                uploadArea.addEventListener('click', () => fileInput.click());
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('dragover');
+                });
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.classList.remove('dragover');
+                });
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('dragover');
+                    this.handleFiles(e.dataTransfer.files);
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    this.handleFiles(e.target.files);
+                });
+
+                // Date filter
+                document.getElementById('applyFilterBtn').addEventListener('click', () => this.applyDateFilter());
+                document.getElementById('clearFilterBtn').addEventListener('click', () => this.clearDateFilter());
+                document.getElementById('dateFrom').addEventListener('change', () => this.applyDateFilter());
+                document.getElementById('dateTo').addEventListener('change', () => this.applyDateFilter());
+
+                // Modal
+                document.getElementById('modalClose').addEventListener('click', () => this.closeModal());
+                document.getElementById('imageModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'imageModal') this.closeModal();
+                });
+                document.getElementById('modalDownload').addEventListener('click', () => this.downloadImage());
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') this.closeModal();
+                });
+            }
+
+            createGroup() {
+                const groupName = document.getElementById('groupName').value.trim();
+                if (!groupName) {
+                    alert('Please enter a group name');
+                    return;
+                }
+
+                if (this.groups.some(g => g.name === groupName)) {
+                    alert('Group name already exists');
+                    return;
+                }
+
+                const newGroup = {
+                    id: Date.now().toString(),
+                    name: groupName,
+                    photos: [],
+                    createdAt: new Date().toISOString()
+                };
+
+                this.groups.push(newGroup);
+                this.saveData();
+                this.renderGroups();
+                document.getElementById('groupName').value = '';
+            }
+
+            deleteGroup(groupId) {
+                if (confirm('Are you sure you want to delete this group and all its photos?')) {
+                    this.groups = this.groups.filter(g => g.id !== groupId);
+                    this.saveData();
+                    this.renderGroups();
+                }
+            }
+
+            openGroup(groupId) {
+                this.currentGroup = this.groups.find(g => g.id === groupId);
+                if (this.currentGroup) {
+                    this.showGroupPage();
+                    this.renderPhotos();
+                }
+            }
+
+            showHomePage() {
+                document.getElementById('homePage').style.display = 'block';
+                document.getElementById('groupPage').style.display = 'none';
+                document.getElementById('backBtn').style.display = 'none';
+                document.getElementById('breadcrumbText').textContent = 'Home';
+                this.currentGroup = null;
+            }
+
+            showGroupPage() {
+                document.getElementById('homePage').style.display = 'none';
+                document.getElementById('groupPage').style.display = 'block';
+                document.getElementById('backBtn').style.display = 'inline-flex';
+                document.getElementById('breadcrumbText').innerHTML = `Home <i class="fas fa-chevron-right"></i> ${this.currentGroup.name}`;
+                document.getElementById('groupTitle').innerHTML = `<i class="fas fa-folder"></i> ${this.currentGroup.name}`;
+                this.clearDateFilter();
+            }
+
+            applyDateFilter() {
+                if (!this.currentGroup) return;
+
+                const fromDate = document.getElementById('dateFrom').value;
+                const toDate = document.getElementById('dateTo').value;
+
+                this.dateFilter.from = fromDate ? new Date(fromDate) : null;
+                this.dateFilter.to = toDate ? new Date(toDate + 'T23:59:59') : null;
+
+                this.filterPhotos();
+                this.renderPhotos();
+            }
+
+            clearDateFilter() {
+                document.getElementById('dateFrom').value = '';
+                document.getElementById('dateTo').value = '';
+                this.dateFilter = { from: null, to: null };
+                this.filterPhotos();
+                this.renderPhotos();
+            }
+
+            filterPhotos() {
+                if (!this.currentGroup) return;
+
+                let photos = [...this.currentGroup.photos];
+
+                // Apply date filter
+                if (this.dateFilter.from || this.dateFilter.to) {
+                    photos = photos.filter(photo => {
+                        const photoDate = new Date(photo.uploadedAt);
+                        
+                        if (this.dateFilter.from && photoDate < this.dateFilter.from) {
+                            return false;
+                        }
+                        
+                        if (this.dateFilter.to && photoDate > this.dateFilter.to) {
+                            return false;
+                        }
+                        
+                        return true;
+                    });
+                }
+
+                // Sort by date (newest first)
+                photos.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+
+                this.filteredPhotos = photos;
+                this.updatePhotoCount();
+            }
+
+            handleFiles(files) {
+                if (!this.currentGroup) return;
+
+                Array.from(files).forEach(file => {
+                    if (!file.type.startsWith('image/')) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const photo = {
+                            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                            url: e.target.result,
+                            name: file.name,
+                            description: '',
+                            uploadedAt: new Date().toISOString()
+                        };
+
+                        this.currentGroup.photos.push(photo);
+                        this.saveData();
+                        this.filterPhotos();
+                        this.renderPhotos();
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            updatePhotoDescription(photoId, description) {
+                if (!this.currentGroup) return;
+
+                const photo = this.currentGroup.photos.find(p => p.id === photoId);
+                if (photo) {
+                    photo.description = description;
+                    this.saveData();
+                }
+            }
+
+            deletePhoto(photoId) {
+                if (!this.currentGroup) return;
+
+                if (confirm('Are you sure you want to delete this photo?')) {
+                    this.currentGroup.photos = this.currentGroup.photos.filter(p => p.id !== photoId);
+                    this.saveData();
+                    this.filterPhotos();
+                    this.renderPhotos();
+                }
+            }
+
+            openModal(imageUrl) {
+                this.currentImageUrl = imageUrl;
+                document.getElementById('modalImage').src = imageUrl;
+                document.getElementById('imageModal').classList.add('active');
+            }
+
+            closeModal() {
+                document.getElementById('imageModal').classList.remove('active');
+                this.currentImageUrl = null;
+            }
+
+            downloadImage() {
+                if (!this.currentImageUrl) return;
+
+                const link = document.createElement('a');
+                link.href = this.currentImageUrl;
+                link.download = `photo-${Date.now()}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            renderGroups() {
+                const emptyState = document.getElementById('emptyState');
+                const groupsGrid = document.getElementById('groupsGrid');
+
+                if (this.groups.length === 0) {
+                    emptyState.style.display = 'block';
+                    groupsGrid.style.display = 'none';
+                } else {
+                    emptyState.style.display = 'none';
+                    groupsGrid.style.display = 'grid';
+                    
+                    groupsGrid.innerHTML = this.groups.map(group => `
+                        <div class="group-card">
+                            <div class="group-header">
+                                <div class="group-name">${group.name}</div>
+                                <button class="btn btn-danger btn-sm" onclick="app.deleteGroup('${group.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <div class="group-stats">
+                                <i class="fas fa-images"></i> ${group.photos.length} photos
+                                <br>
+                                <i class="fas fa-calendar"></i> Created ${new Date(group.createdAt).toLocaleDateString()}
+                            </div>
+                            <div class="group-actions">
+                                <button class="btn btn-primary" onclick="app.openGroup('${group.id}')">
+                                    <i class="fas fa-folder-open"></i> Open Group
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            renderPhotos() {
+                if (!this.currentGroup) return;
+
+                const emptyState = document.getElementById('photosEmptyState');
+                const photosGrid = document.getElementById('photosGrid');
+                const photosToShow = this.filteredPhotos.length > 0 ? this.filteredPhotos : this.currentGroup.photos;
+
+                // If no photos match filter but group has photos, show filter message
+                if (this.filteredPhotos.length === 0 && this.currentGroup.photos.length > 0 && (this.dateFilter.from || this.dateFilter.to)) {
+                    emptyState.style.display = 'block';
+                    photosGrid.style.display = 'none';
+                    emptyState.innerHTML = `
+                        <i class="fas fa-filter"></i>
+                        <h3>No photos match the selected date range</h3>
+                        <p>Try adjusting your date filter or clear the filter to see all photos</p>
+                    `;
+                    return;
+                }
+
+                if (photosToShow.length === 0) {
+                    emptyState.style.display = 'block';
+                    photosGrid.style.display = 'none';
+                    emptyState.innerHTML = `
+                        <i class="fas fa-images"></i>
+                        <h3>No photos yet</h3>
+                        <p>Upload your first photos to this group</p>
+                    `;
+                } else {
+                    emptyState.style.display = 'none';
+                    photosGrid.style.display = 'grid';
+                    
+                    photosGrid.innerHTML = photosToShow.map(photo => `
+                        <div class="photo-card">
+                            <img src="${photo.url}" alt="${photo.name}" class="photo-image" onclick="app.openModal('${photo.url}')">
+                            <div class="photo-info">
+                                <div style="font-size: 0.8rem; color: #666; margin-bottom: 8px;">
+                                    <i class="fas fa-calendar"></i> ${new Date(photo.uploadedAt).toLocaleDateString()}
+                                    ${new Date(photo.uploadedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                </div>
+                                <div class="photo-description">
+                                    <textarea 
+                                        placeholder="Add description..." 
+                                        onblur="app.updatePhotoDescription('${photo.id}', this.value)"
+                                    >${photo.description}</textarea>
+                                </div>
+                                <div class="photo-actions">
+                                    <button class="btn btn-secondary btn-sm" onclick="app.openModal('${photo.url}')">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="app.deletePhoto('${photo.id}')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            updatePhotoCount() {
+                const photoCount = document.getElementById('photoCount');
+                if (photoCount) {
+                    const total = this.currentGroup ? this.currentGroup.photos.length : 0;
+                    const filtered = this.filteredPhotos.length;
+                    
+                    if (this.dateFilter.from || this.dateFilter.to) {
+                        photoCount.textContent = `${filtered} of ${total} photos`;
+                    } else {
+                        photoCount.textContent = `${total} photos`;
+                    }
+                }
+            }
+
+            saveData() {
+                localStorage.setItem('photoGroups', JSON.stringify(this.groups));
+            }
+        }
+
+        // Initialize the app
+        const app = new PhotoGalleryApp();
+    </script>
+</body>
+</html>
